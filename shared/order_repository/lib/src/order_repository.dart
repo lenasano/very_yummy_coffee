@@ -31,12 +31,16 @@ class OrderRepository {
   String? get currentOrderId => _currentOrderId;
   static const Uuid _uuid = Uuid();
 
+  /// Tracks the orders submitted in this session, e.g. by a mobile app
+  /// instance.
+  final List<String> currentSessionOrderIds = [];
+
   BehaviorSubject<Orders>? _ordersSubject;
   StreamSubscription<Map<String, dynamic>>? _ordersWsSub;
 
   /// A live stream of all orders, synced from the server.
   ///
-  /// Subscribes to the 'orders' WebSocket topic on first access.
+  /// Subscribes to the 'orders' WebSocket topic on first access. 
   Stream<Orders> get ordersStream {
     _initOrdersIfNeeded();
     return _ordersSubject!.stream;
@@ -52,6 +56,26 @@ class OrderRepository {
   Stream<Order?> orderStream(String orderId) => ordersStream.map(
     (orders) => orders.orders.firstWhereOrNull((order) => order.id == orderId),
   );
+
+  /// A live stream of all orders from the current session (e.g. on a mobile
+  /// instance).
+  Stream<Orders> get currentSessionOrdersStream => ordersStream.map(
+    (orders) {
+        final currentSessionOrders = orders.orders.where(
+          (order) => _isOrderInCurrentSession(order.id)).toList();
+        return Orders(orders: currentSessionOrders);
+      });
+
+  /// Checks if the order belongs to the current session.
+  bool _isOrderInCurrentSession(String orderId)
+    => currentSessionOrderIds.contains(orderId);
+
+  // Stores order IDs for the current session.
+  void _trackOrderInCurrentSession(String orderId){
+    if(!_isOrderInCurrentSession(orderId)) {
+      currentSessionOrderIds.add(orderId);
+    }
+  }
 
   /// Creates a new order on the server.
   ///
@@ -129,6 +153,7 @@ class OrderRepository {
   void submitCurrentOrder() {
     final orderId = _currentOrderId;
     if (orderId == null) return;
+    _trackOrderInCurrentSession(orderId);
     _wsRpcClient.sendAction(SubmitOrderAction(orderId: orderId));
     _currentOrderId = null;
   }

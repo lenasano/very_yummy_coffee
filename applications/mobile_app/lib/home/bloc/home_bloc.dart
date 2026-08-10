@@ -20,7 +20,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     await emit.forEach(
-      _orderRepository.ordersStream,
+      _orderRepository.currentSessionOrdersStream,
       onData: (orders) {
         final active = orders.orders
             .where(
