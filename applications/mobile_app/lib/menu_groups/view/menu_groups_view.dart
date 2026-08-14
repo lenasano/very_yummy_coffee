@@ -119,7 +119,7 @@ class _MenuGroupCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(context.radius.large),
         border: Border.all(color: context.colors.border),
       ),
-      padding: EdgeInsets.all(context.spacing.xl),
+      padding: EdgeInsets.all(context.spacing.lg),
       child: Row(
         children: [
           Expanded(
@@ -137,7 +137,8 @@ class _MenuGroupCard extends StatelessWidget {
                 SizedBox(height: context.spacing.xs),
                 Text(
                   group.description,
-                  style: context.typography.muted,
+                  style: context.typography.muted
+                    .copyWith(fontSize: 14, height: 1.2),
                 ),
               ],
             ),
