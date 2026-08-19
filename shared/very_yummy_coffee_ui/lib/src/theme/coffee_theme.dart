@@ -10,7 +10,7 @@ abstract class CoffeeTheme {
   /// The light theme data.
   static ThemeData get light {
     const colors = AppColors(
-      primary: Color(0xFFC96B45),
+      primary: Color(0xFF5C868B),
       secondary: Color(0xFFF0EFE8),
       accentGold: Color(0xFFE7BD5A),
       background: Color(0xFFF5F2EC),
@@ -22,7 +22,7 @@ abstract class CoffeeTheme {
       destructive: Color(0xFFC4574C),
       success: Color(0xFF5A9E6F),
       warning: Color(0xFFD4A354),
-      navBarBackground: Color(0xFF4A2A22),
+      navBarBackground: Color.fromARGB(255, 34, 67, 74),
       navBarInactive: Color(0xFFB8A99A),
       imagePlaceholder: Color(0xFFE8DDD6),
       topBarBackground: Color(0xFF2D1B14),
