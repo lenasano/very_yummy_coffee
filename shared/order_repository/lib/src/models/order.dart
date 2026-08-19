@@ -26,6 +26,7 @@ class Order with OrderMappable {
     required this.status,
     this.customerName,
     this.submittedAt,
+    this.discount = 0.0,
   });
 
   final String id;
@@ -44,12 +45,23 @@ class Order with OrderMappable {
   /// Null for orders that were created before this field was introduced.
   final DateTime? submittedAt;
 
-  int get total => items.fold(
-    0,
-    (sum, item) => sum + item.unitPriceWithModifiers * item.quantity,
-  );
+  /// The discount applied to the order, applied in the mobile app.
+  ///
+  /// Set via the `UpdateDiscountOnOrder` WS action. 0.0 when no discount has
+  /// been applied.
+  final double discount;
+
+  int get total {
+    final t = items.fold(
+      0,
+      (sum, item) => sum + item.unitPriceWithModifiers * item.quantity,
+    );
+    return (t * (1.0 - discount)).round();
+  }
   int get tax => (total * 8 + 50) ~/ 100;
   int get grandTotal => total + tax;
+
+  set discount(double d) => discount = d;
 }
 
 /// Display helpers for [Order].

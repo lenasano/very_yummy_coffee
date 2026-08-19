@@ -134,6 +134,18 @@ class ServerState {
           broadcast('order:$orderId', _orders[orderId]!);
         }
 
+      case 'updateDiscountOnOrder':
+        final orderId = payload['orderId'] as String;
+        final order = _orders[orderId];
+        if (order != null && order['status'] == 'pending') {
+          _orders[orderId] = <String, dynamic>{
+            ...order,
+            'discount': payload['discount'] as double? ?? 0.0,
+          };
+          broadcast('orders', snapshotForTopic('orders'));
+          broadcast('order:$orderId', _orders[orderId]!);
+        }
+
       case 'addItemToOrder':
         final orderId = payload['orderId'] as String;
         final order = _orders[orderId];

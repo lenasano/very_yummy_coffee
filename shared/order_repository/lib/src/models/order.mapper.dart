@@ -104,6 +104,13 @@ class OrderMapper extends ClassMapperBase<Order> {
     _$submittedAt,
     opt: true,
   );
+  static double _$discount(Order v) => v.discount;
+  static const Field<Order, double> _f$discount = Field(
+    'discount',
+    _$discount,
+    opt: true,
+    def: 0.0,
+  );
 
   @override
   final MappableFields<Order> fields = const {
@@ -112,6 +119,7 @@ class OrderMapper extends ClassMapperBase<Order> {
     #status: _f$status,
     #customerName: _f$customerName,
     #submittedAt: _f$submittedAt,
+    #discount: _f$discount,
   };
 
   static Order _instantiate(DecodingData data) {
@@ -121,6 +129,7 @@ class OrderMapper extends ClassMapperBase<Order> {
       status: data.dec(_f$status),
       customerName: data.dec(_f$customerName),
       submittedAt: data.dec(_f$submittedAt),
+      discount: data.dec(_f$discount),
     );
   }
 
@@ -178,6 +187,7 @@ abstract class OrderCopyWith<$R, $In extends Order, $Out>
     OrderStatus? status,
     String? customerName,
     DateTime? submittedAt,
+    double? discount,
   });
   OrderCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(Then<$Out2, $R2> t);
 }
@@ -202,6 +212,7 @@ class _OrderCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Order, $Out>
     OrderStatus? status,
     Object? customerName = $none,
     Object? submittedAt = $none,
+    double? discount,
   }) => $apply(
     FieldCopyWithData({
       if (id != null) #id: id,
@@ -209,6 +220,7 @@ class _OrderCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Order, $Out>
       if (status != null) #status: status,
       if (customerName != $none) #customerName: customerName,
       if (submittedAt != $none) #submittedAt: submittedAt,
+      if (discount != null) #discount: discount,
     }),
   );
   @override
@@ -218,6 +230,7 @@ class _OrderCopyWithImpl<$R, $Out> extends ClassCopyWithBase<$R, Order, $Out>
     status: data.get(#status, or: $value.status),
     customerName: data.get(#customerName, or: $value.customerName),
     submittedAt: data.get(#submittedAt, or: $value.submittedAt),
+    discount: data.get(#discount, or: $value.discount),
   );
 
   @override

@@ -263,6 +263,36 @@ class UpdateNameOnOrderAction extends RpcAction {
   int get hashCode => Object.hash(orderId, customerName);
 }
 
+/// Updates the customer name on an order.
+class UpdateDiscountOnOrderAction extends RpcAction {
+  const UpdateDiscountOnOrderAction({
+    required this.orderId,
+    required this.discount,
+  });
+
+  final String orderId;
+  final double discount;
+
+  @override
+  String get actionName => 'updateDiscountOnOrder';
+
+  @override
+  Map<String, dynamic> toPayloadMap() => {
+    'orderId': orderId,
+    'discount': discount,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UpdateDiscountOnOrderAction &&
+          other.orderId == orderId &&
+          other.discount == discount;
+
+  @override
+  int get hashCode => Object.hash(orderId, discount);
+}
+
 /// Updates the availability of a menu item.
 class UpdateMenuItemAvailabilityAction extends RpcAction {
   const UpdateMenuItemAvailabilityAction({

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:order_repository/order_repository.dart';
+import 'package:very_yummy_coffee_mobile_app/features/discount/discount_teaser/discount_teaser.dart';
 import 'package:very_yummy_coffee_mobile_app/home/home.dart';
 import 'package:very_yummy_coffee_mobile_app/l10n/l10n.dart';
 import 'package:very_yummy_coffee_mobile_app/menu_groups/menu_groups.dart';
@@ -25,6 +26,7 @@ class HomeView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _HomeHeader(greeting: _greeting(context.l10n)),
+          const DiscountTeaserFeature(),
           Expanded(
             child: BlocBuilder<HomeBloc, HomeState>(
               builder: (context, state) {

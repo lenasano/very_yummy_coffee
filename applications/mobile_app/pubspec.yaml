@@ -21,6 +21,8 @@ dependencies:
   flutter_bloc: ^9.1.1
   flutter_localizations:
     sdk: flutter
+  fme_repository:
+    path: ../../shared/fme_repository
   go_router: ^14.6.2
   intl: ^0.20.2
   menu_repository:
@@ -63,5 +65,6 @@ flutter_launcher_icons:
 flutter:
   assets:
     - shorebird.yaml
+    - assets/discount_coupon.png
   generate: true
   uses-material-design: true

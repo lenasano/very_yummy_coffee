@@ -42,6 +42,10 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
     if (trimmedName.isNotEmpty) {
       await _orderRepository.updateNameOnCurrentOrder(trimmedName);
     }
+    final discount = event.discount;
+    if (discount > 0.0) {
+      await _orderRepository.updateDiscountOnCurrentOrder(discount);
+    }
     _orderRepository.submitCurrentOrder();
     emit(state.copyWith(status: CheckoutStatus.success));
   }

@@ -13,7 +13,8 @@ class CheckoutSubscriptionRequested extends CheckoutEvent
 
 @MappableClass()
 class CheckoutConfirmed extends CheckoutEvent with CheckoutConfirmedMappable {
-  const CheckoutConfirmed({this.customerName = ''});
+  const CheckoutConfirmed({this.customerName = '', this.discount = 0.0});
 
   final String customerName;
+  final double discount;
 }

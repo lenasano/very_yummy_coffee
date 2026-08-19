@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:order_repository/order_repository.dart';
 import 'package:very_yummy_coffee_mobile_app/checkout/checkout.dart';
+import 'package:very_yummy_coffee_mobile_app/features/discount/discount_coupon/discount_coupon.dart';
+import 'package:very_yummy_coffee_mobile_app/features/shared/fme/fme.dart';
 import 'package:very_yummy_coffee_mobile_app/l10n/l10n.dart';
 import 'package:very_yummy_coffee_ui/very_yummy_coffee_ui.dart';
 
@@ -17,6 +19,15 @@ class CheckoutView extends StatefulWidget {
 class _CheckoutViewState extends State<CheckoutView> {
   final _nameController = TextEditingController();
 
+  // The offered discount will be a percentage, e.g. 0.1 (10%)
+  // ignore: prefer_int_literals
+  double _offer = 0.0;  // overwritten by a feature flag
+
+  // After the user clicks the coupon, the applied discount
+  // will be a percentage, e.g. 0.1 (10%)
+  // ignore: prefer_int_literals
+  double _appliedDiscount = 0.0;
+  
   @override
   void dispose() {
     _nameController.dispose();
@@ -25,6 +36,12 @@ class _CheckoutViewState extends State<CheckoutView> {
 
   @override
   Widget build(BuildContext context) {
+
+    final fmeState = context.watch<FmeFlagOfferDiscountBloc>().state;
+    // Must be `watch` otherwise, discount widget is stuck on loading.
+    // Note that bloc will initiate every time the widget is shown.
+    // TODO(me): Implement feature flag propagation).
+
     return BlocConsumer<CheckoutBloc, CheckoutState>(
       buildWhen: ( previous, _) => 
         // don't rebuild while navigating
@@ -51,6 +68,14 @@ class _CheckoutViewState extends State<CheckoutView> {
         }
 
         final order = state.order;
+        var offerInt = 0;
+
+        if(FmeStatus.success == fmeState.status) {
+          offerInt = fmeState.discountOffer;
+          _offer = offerInt.toDouble() / 100.0;
+        }
+        //log('[checkout_view] rebuilding, offer is $offerInt');
+
         return Scaffold(
           backgroundColor: context.colors.background,
           body: Column(
@@ -63,11 +88,33 @@ class _CheckoutViewState extends State<CheckoutView> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: context.spacing.xl),
+                      if (fmeState.status == FmeStatus.success && 
+                          offerInt > 0) 
+                        DiscountCouponFeature(
+                          offer: offerInt,
+                          appliedDiscount: _appliedDiscount, 
+                          onDiscountClicked:  () { 
+                              setState(() => 
+                              _appliedDiscount =
+                                _offer - _appliedDiscount);
+                            },
+                        )
+                      else if (FmeStatus.loading == fmeState.status)
+                        const Center(
+                          child: CircularProgressIndicator(
+                            padding: EdgeInsets.all(16)
+                          )
+                        ),
                       _CustomerNameCard(controller: _nameController),
                       SizedBox(height: context.spacing.xl),
                       const _FakePaymentCard(),
                       SizedBox(height: context.spacing.xl),
-                      if (order != null) _OrderSummarySection(order: order),
+                      if (order != null) 
+                        _OrderSummarySection(
+                          order: order, 
+                          offer: offerInt, 
+                          discount: _appliedDiscount
+                        ),
                       SizedBox(height: context.spacing.xl),
                     ],
                   ),
@@ -78,8 +125,10 @@ class _CheckoutViewState extends State<CheckoutView> {
                   order: order,
                   isSubmitting: state.status == CheckoutStatus.submitting,
                   nameController: _nameController,
+                  discount: _appliedDiscount,
                 ),
-              if (state.status == CheckoutStatus.failure && state.order != null)
+              if (state.status == CheckoutStatus.failure &&
+                  state.order != null)
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: context.spacing.xl,
@@ -238,9 +287,14 @@ class _FakePaymentCard extends StatelessWidget {
 }
 
 class _OrderSummarySection extends StatelessWidget {
-  const _OrderSummarySection({required this.order});
+  const _OrderSummarySection({
+    required this.order, 
+    this.offer = 0, 
+    this.discount = 0.0 });
 
   final Order order;
+  final int offer;
+  final double discount;
 
   @override
   Widget build(BuildContext context) {
@@ -271,20 +325,27 @@ class _OrderSummarySection extends StatelessWidget {
                   color: context.colors.mutedForeground,
                 ),
               ),
+              if( discount != 0.0) SizedBox(height: context.spacing.md),
+              if( discount != 0.0) _SummaryRow(
+                label: 'Sweet! $offer% discount',
+                amount: (order.total * discount).round(),
+                style: context.typography.body.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                sign: '-'
+              ),
               SizedBox(height: context.spacing.sm),
               _SummaryRow(
                 label: context.l10n.cartTaxLabel,
-                amount: order.tax,
-                style: context.typography.body.copyWith(
-                  color: context.colors.mutedForeground,
-                ),
+                amount: ( order.tax * (1.0 - discount) ).round(),
+                style: context.typography.body,
               ),
               SizedBox(height: context.spacing.md),
               Divider(color: context.colors.border),
               SizedBox(height: context.spacing.md),
               _SummaryRow(
                 label: context.l10n.cartTotalLabel,
-                amount: order.grandTotal,
+                amount: ( order.grandTotal * (1.0 - discount) ).round(),
                 style: context.typography.headline.copyWith(
                   color: context.colors.foreground,
                 ),
@@ -302,11 +363,13 @@ class _SummaryRow extends StatelessWidget {
     required this.label,
     required this.amount,
     required this.style,
+    this.sign = ''
   });
 
   final String label;
   final int amount;
   final TextStyle style;
+  final String sign;
 
   @override
   Widget build(BuildContext context) {
@@ -314,7 +377,7 @@ class _SummaryRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: style),
-        Text('\$${(amount / 100).toStringAsFixed(2)}', style: style),
+        Text('$sign\$${(amount / 100).toStringAsFixed(2)}', style: style),
       ],
     );
   }
@@ -325,24 +388,44 @@ class _PlaceOrderButton extends StatelessWidget {
     required this.order,
     required this.isSubmitting,
     required this.nameController,
+    this.discount = 0.0
   });
 
   final Order order;
   final bool isSubmitting;
   final TextEditingController nameController;
+  final double discount;
 
   @override
   Widget build(BuildContext context) {
-    final total = '\$${(order.grandTotal / 100).toStringAsFixed(2)}';
+    final total = 
+      '\$${
+        (( order.grandTotal * (1.0 - discount) ).round() / 100)
+        .toStringAsFixed(2)
+      }';
     return SafeArea(
       top: false,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: context.spacing.xl),
         child: BaseButton(
           label: context.l10n.checkoutPlaceOrder(total),
-          onPressed: () => context.read<CheckoutBloc>().add(
-            CheckoutConfirmed(customerName: nameController.text),
-          ),
+          onPressed: () {
+            final fmeBloc = context.read<FmeFlagOfferDiscountBloc>()
+            ..add(FmeProfitInCentsEvent(
+              value: (order.grandTotal * (0.7 - discount)).round()
+            ));
+
+            var numberOfItems = 0;
+            for( final i in order.items ) { numberOfItems += i.quantity; }
+            fmeBloc.add(FmeNumberOfItemsEvent(value: numberOfItems));
+
+            context.read<CheckoutBloc>().add(
+              CheckoutConfirmed(
+                customerName: nameController.text, 
+                discount: discount
+              ),
+            );
+          },
           isLoading: isSubmitting,
         ),
       ),

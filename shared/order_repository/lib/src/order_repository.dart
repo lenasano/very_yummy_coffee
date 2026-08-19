@@ -146,6 +146,22 @@ class OrderRepository {
     );
   }
 
+  /// Updates the discount that is applied on the current order,
+  /// e.g. a value of 0.1 represents a 10% discount.
+  ///
+  /// No-op if [currentOrderId] is null.
+  Future<void> updateDiscountOnCurrentOrder(double discount) async {
+    assert(0.0 <= discount && discount <= 1.0, 
+      'discount must be a value between 0 and 1');
+    if (_currentOrderId == null) return;
+    _wsRpcClient.sendAction(
+      UpdateDiscountOnOrderAction(
+        orderId: _currentOrderId!,
+        discount: discount,
+      ),
+    );
+  }
+  
   /// Submits the current order on the server (pending -> submitted).
   ///
   /// Sends a `submitOrder` WS action and clears [currentOrderId].

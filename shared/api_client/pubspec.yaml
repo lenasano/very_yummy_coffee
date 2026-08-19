@@ -7,6 +7,8 @@ environment:
   sdk: ^3.11.0
 
 dependencies:
+  feature_management_experimentation_models:
+    path: ../feature_management_experimentation_models
   http: ^1.4.0
   very_yummy_coffee_models:
     path: ../very_yummy_coffee_models

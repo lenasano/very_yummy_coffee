@@ -4,11 +4,31 @@
 
 A full-stack coffee ordering system built with Flutter and Dart Frog. The monorepo contains multiple front-end applications, a real-time backend, and shared packages that keep domain logic, API communication, and UI consistent across all apps.
 
+## <img width="24" height="24" alt="harness_favicon" src="images/harness_favicon.png" /> Harness Feature Management & Experimentation (FME)
+
+This version of Very Yummy Coffee includes a RPC backend microservice that evaluates Harness FME feature flags.
+
+Flag treatment results for each user key are [propagated to the client](images/feature_flag_propagation.png). The code in the `mobile_app` demonstrates how you can evaluate FME feature flags (for granular feature releases) and send events (for experimentation).
+
+\[TODO: Animation here.\]
+
+To evaluate feature flags in code:
+
+1. [Sign up to Harness for free](https://app.harness.io/auth/#/signup) and choose the Feature Management & Experimentation tile.
+2. Find your [Harness FME server-side SDK API key](https://developer.harness.io/docs/feature-management-experimentation/api-keys?fme-split=fme) and take note of the associated **Environment**.
+3. \[TODO: Complete steps here.\]
+
+When the backend server and mobile app are running, you will see feature flag impressions (evaluations) showing up on the **Live tail** tab of your feature flags or of Data Hub in Harness FME.
+
+If you have questions, reach out to us at support@split.io (the support email continues to be used by the team at Harness FME).
+
+[Harness](https://www.harness.io/) is a modern software delivery platform. 
+
 ## Repository Structure
 
 ```
 very-yummy-coffee/
-├── api/                   # Dart Frog backend server
+├── api/                   # Dart Frog backend server, Harness FME feature flags are fetched from Harness Cloud
 ├── applications/
 │   ├── mobile_app/        # Customer ordering app (iOS/Android)
 │   ├── kds_app/           # Kitchen Display System (landscape tablet)
@@ -18,6 +38,8 @@ very-yummy-coffee/
 ├── shared/
 │   ├── api_client/        # HTTP + WebSocket client
 │   ├── very_yummy_coffee_models/  # Shared domain models & RPC types
+│   ├── feature_management_experimentation_models/  # Shared RPC types for Harness FME flags
+│   ├── fme_repository/    # For Harness FME feature flag streaming
 │   ├── menu_repository/   # Menu domain repository
 │   ├── order_repository/  # Order domain repository
 │   ├── connection_repository/  # WebSocket connection state
@@ -50,6 +72,8 @@ All state is held in-memory. The menu is loaded from `api/fixtures/menu.json` on
 |---------|---------|
 | `api_client` | HTTP and WebSocket client; exports `ApiClient`, `LiveConnection`, `WsRpcClient` |
 | `very_yummy_coffee_models` | Domain models (`MenuGroup`, `MenuItem`, `Order`, etc.) and typed RPC protocol classes, serialized with `dart_mappable` |
+| `feature_management_experimentation_models` | Typed RPC protocol classes, serialized with `dart_mappable`|
+| `fme_repository` | Domain for FME feature management with lazy, ref-counted WebSocket subscriptions via `rxdart` |
 | `menu_repository` | Menu domain with lazy, ref-counted WebSocket subscriptions via `rxdart` |
 | `order_repository` | Order domain with WebSocket-synced mutations |
 | `connection_repository` | WebSocket connection state management |
