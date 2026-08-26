@@ -6,11 +6,13 @@ A full-stack coffee ordering system built with Flutter and Dart Frog. The monore
 
 ## <img width="24" height="24" alt="harness_favicon" src="images/harness_favicon.png" /> Harness Feature Management & Experimentation (FME)
 
-This version of Very Yummy Coffee includes a RPC backend microservice that evaluates Harness FME feature flags.
+This version of Very Yummy Coffee includes a RPC backend microservice that evaluates Harness FME feature flags. Flag treatment results for each user key are [propagated to the client](images/feature_flag_propagation.png).
 
-Flag treatment results for each user key are [propagated to the client](images/feature_flag_propagation.png). The code in the `mobile_app` demonstrates how you can evaluate FME feature flags (for granular feature releases) and send events (for experimentation).
+In this demo, a feature flag serves variant coupon discount amounts to mobile app users and sets up the coffee-ordering system for experimentation.
 
-\[TODO: Animation here.\]
+![Coffee ordering system debug screenshot](https://github.com/lenasano/largeimages/blob/main/full_stack_dart.png)
+
+The code in the `mobile_app` demonstrates how you can evaluate FME feature flags (for finely-controlled feature releases) and send events (for experimentation).
 
 To evaluate feature flags in code:
 
